@@ -1,0 +1,58 @@
+name: CDK Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'デプロイするブランチ'
+        required: true
+        default: 'main'
+        type: string
+      action:
+        description: 'アクション選択'
+        required: true
+        type: choice
+        options:
+          - diff
+          - deploy
+
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  cdk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './cdk/package-lock.json'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Install dependencies
+        working-directory: ./cdk
+        run: npm ci
+
+      - name: CDK Diff
+        if: inputs.action == 'diff'
+        working-directory: ./cdk
+        run: npx cdk diff --color=always
+
+      - name: CDK Deploy
+        if: inputs.action == 'deploy'
+        working-directory: ./cdk
+        run: npx cdk deploy --all --require-approval never
