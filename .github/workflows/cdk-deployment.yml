@@ -1,4 +1,4 @@
-name: CDK Deployment (${{ inputs.action }})
+name: CDK Deployment
 
 on:
   workflow_dispatch:
