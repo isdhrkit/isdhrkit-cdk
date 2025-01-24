@@ -1,4 +1,5 @@
 name: CDK Deployment
+run-name: "CDK ${{ inputs.action }} by @${{ github.actor }}"
 
 on:
   workflow_dispatch:
