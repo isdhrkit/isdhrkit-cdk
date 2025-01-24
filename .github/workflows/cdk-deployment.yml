@@ -42,9 +42,19 @@ jobs:
       - name: CDK Diff
         if: inputs.action == 'diff'
         working-directory: ./cdk
-        run: npx cdk diff --color=always
+        run: |
+          echo "# CDK Diff Results" > diff_output.md
+          echo "\`\`\`diff" >> diff_output.md
+          npx cdk diff --color=never >> diff_output.md 2>&1 || true
+          echo "\`\`\`" >> diff_output.md
+          cat diff_output.md >> $GITHUB_STEP_SUMMARY
 
       - name: CDK Deploy
         if: inputs.action == 'deploy'
         working-directory: ./cdk
-        run: npx cdk deploy --all --require-approval never
+        run: |
+          echo "# CDK Deploy Results" > deploy_output.md
+          echo "\`\`\`" >> deploy_output.md
+          npx cdk deploy --all --require-approval never 2>&1 | tee -a deploy_output.md
+          echo "\`\`\`" >> deploy_output.md
+          cat deploy_output.md >> $GITHUB_STEP_SUMMARY
