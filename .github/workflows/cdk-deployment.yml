@@ -3,11 +3,6 @@ name: CDK Deployment
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'デプロイするブランチ'
-        required: true
-        default: 'main'
-        type: string
       action:
         description: 'アクション選択'
         required: true
@@ -15,7 +10,6 @@ on:
         options:
           - diff
           - deploy
-
 
 permissions:
   id-token: write
@@ -27,8 +21,6 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.branch }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
