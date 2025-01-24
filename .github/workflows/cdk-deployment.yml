@@ -1,5 +1,5 @@
 name: CDK Deployment
-run-name: "CDK ${{ inputs.action }}
+run-name: "CDK ${{ inputs.action }}"
 
 on:
   workflow_dispatch:
