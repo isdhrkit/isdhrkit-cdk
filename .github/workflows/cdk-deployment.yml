@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   cdk:
+    name: CDK ${{ inputs.action }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
