@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
 import { GitHubOidcStack } from '../lib/github-oidc-stack';
+import { S3Stack } from '../lib/s3-stack';
 
 const app = new cdk.App();
 
@@ -19,3 +20,6 @@ const githubOidcStack = new GitHubOidcStack(app, 'GitHubOidcStack', {
     repo: 'isdhrkit-cdk',
   },
 });
+
+// S3スタックの追加
+new S3Stack(app, 'HirokitS3Stack');
