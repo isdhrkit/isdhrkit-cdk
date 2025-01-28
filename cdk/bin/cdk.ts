@@ -2,6 +2,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { GitHubOidcStack } from '../lib/github-oidc-stack';
 import { S3Stack } from '../lib/s3-stack';
+import { HirokitSiteStack } from '../lib/hirokit-site-stack';
 
 const app = new cdk.App();
 
@@ -21,5 +22,8 @@ const githubOidcStack = new GitHubOidcStack(app, 'GitHubOidcStack', {
   },
 });
 
-// S3スタックの追加
-new S3Stack(app, 'HirokitS3Stack');
+
+
+new HirokitSiteStack(app, 'HirokitSiteStack', {
+  env
+});
