@@ -8,21 +8,15 @@
         body {
             margin: 0;
             background: black;
-            overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #0F0;
             text-align: center;
-        }
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .content {
-            position: relative;
-            z-index: 2;
             padding: 50px;
         }
         h1 {
@@ -50,77 +44,10 @@
     </style>
 </head>
 <body>
-    <canvas id="matrix"></canvas>
     <div class="content">
         <h1>404</h1>
         <p>お探しのページが見つかりませんでした。</p>
         <p><a href="/">トップページに戻る</a></p>
     </div>
-
-    <script>
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d', { alpha: false });
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const dpr = window.devicePixelRatio || 1;
-            canvas.style.width = `${canvas.width}px`;
-            canvas.style.height = `${canvas.height}px`;
-            canvas.width *= dpr;
-            canvas.height *= dpr;
-            ctx.scale(dpr, dpr);
-        }
-        resizeCanvas();
-
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
-        const fontSize = 14;
-        const columns = Math.floor(canvas.width / fontSize);
-        const drops = new Array(columns).fill(1);
-
-        let animationId;
-        function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
-
-            for (let i = 0; i < drops.length; i++) {
-                if (i % 3 !== 0) continue;
-
-                const text = chars[Math.floor(Math.random() * chars.length)];
-                const x = i * fontSize;
-                ctx.fillText(text, x, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-
-            animationId = requestAnimationFrame(draw);
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                cancelAnimationFrame(animationId);
-            } else {
-                draw();
-            }
-        });
-
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                resizeCanvas();
-                drops.length = Math.floor(canvas.width / fontSize);
-                drops.fill(1);
-            }, 250);
-        });
-
-        draw();
-    </script>
 </body>
 </html> 
