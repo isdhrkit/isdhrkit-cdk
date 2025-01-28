@@ -5,6 +5,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { getCurrentConfig } from './config';
 
@@ -45,11 +46,48 @@ export class HirokitSiteStack extends cdk.Stack {
         // ビューワープロトコルポリシーをHTTPSのみに設定
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
+      // 追加のビヘイビアを設定
+      additionalBehaviors: {
+        '/404.html': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
+            originPath: `${config.s3.contentPath}/errors`,
+          }),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+      },
       // 代替ドメイン名の設定
       domainNames: [fullDomainName],
       certificate: props.certificate,
       defaultRootObject: 'index.html',
+      // 404エラーページの設定を追加
+      errorResponses: [
+        {
+          httpStatus: 404,
+          responseHttpStatus: 404,
+          responsePagePath: '/404.html',
+        }
+      ],
     });
+
+    // CloudFrontのOACからのアクセスを許可するバケットポリシーを追加
+    // OAC を有効化した時点で s3:GetObject が付与されるが、明示的に記述しておく
+    siteBucket.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:GetObject', 's3:ListBucket'],
+        principals: [
+          new iam.ServicePrincipal('cloudfront.amazonaws.com')
+        ],
+        resources: [
+          siteBucket.arnForObjects('*'),  // オブジェクトへのアクセス
+          siteBucket.bucketArn,          // バケットのルートへのアクセス
+        ],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceArn': `arn:aws:cloudfront::${this.account}:distribution/${distribution.distributionId}`
+          }
+        }
+      })
+    );
 
     // Route 53にAレコードを作成
     new route53.ARecord(this, `${config.environment}SiteAliasRecord`, {
