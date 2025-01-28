@@ -34,29 +34,45 @@ export class HirokitSiteStack extends cdk.Stack {
       objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
     });
 
+    // CloudFront Function の作成
+    const appendIndexFunction = new cloudfront.Function(this, `${config.environment}AppendIndexHtml`, {
+      code: cloudfront.FunctionCode.fromInline(`
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          
+          // Check whether the URI is missing a file name.
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+          }
+          // Check whether the URI is missing a file extension.
+          else if (!uri.includes('.')) {
+            request.uri += '/index.html';
+          }
+          
+          return request;
+        }
+      `),
+      comment: 'Add index.html to the path',
+    });
+
     // CloudFrontディストリビューションの作成
     const distribution = new cloudfront.Distribution(this, `${config.environment}SiteDistribution`, {
-      // デフォルトのビヘイビア設定
       defaultBehavior: {
-        // S3バケットをオリジンとして設定し、OACを有効化
         origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
-          // オリジンパスを指定
           originPath: config.s3.contentPath,
         }),
-        // ビューワープロトコルポリシーをHTTPSのみに設定
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        functionAssociations: [{
+          function: appendIndexFunction,
+          eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+        }],
       },
       // 追加のビヘイビアを設定
       additionalBehaviors: {
         '/404.html': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
             originPath: `${config.s3.contentPath}/errors`,
-          }),
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        },
-        '/roulette/*': {
-          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
-            originPath: config.s3.contentPath,
           }),
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
