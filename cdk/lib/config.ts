@@ -1,7 +1,7 @@
 export interface SiteConfig {
   domain: {
     domainName: string;
-    wwwSubDomain: string;
+    subDomain: string;
   };
   s3: {
     bucketName: string;
@@ -13,7 +13,7 @@ export const config: { [env: string]: SiteConfig } = {
   dev: {
     domain: {
       domainName: 'hirokit.jp',
-      wwwSubDomain: 'dev',
+      subDomain: 'dev',
     },
     s3: {
       bucketName: 'hirokit-dev',
@@ -23,7 +23,7 @@ export const config: { [env: string]: SiteConfig } = {
   stg: {
     domain: {
       domainName: 'hirokit.jp',
-      wwwSubDomain: 'stg',
+      subDomain: 'stg',
     },
     s3: {
       bucketName: 'hirokit-stg',
@@ -33,7 +33,7 @@ export const config: { [env: string]: SiteConfig } = {
   prod: {
     domain: {
       domainName: 'hirokit.jp',
-      wwwSubDomain: 'www',
+      subDomain: 'www',
     },
     s3: {
       bucketName: 'hirokit-prod',

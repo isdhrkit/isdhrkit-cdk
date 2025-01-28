@@ -2,6 +2,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { GitHubOidcStack } from '../lib/github-oidc-stack';
 import { HirokitSiteStack } from '../lib/hirokit-site-stack';
+import { CertificateStack } from '../lib/certificate-stack';
 
 const app = new cdk.App();
 
@@ -21,6 +22,16 @@ const githubOidcStack = new GitHubOidcStack(app, 'GitHubOidcStack', {
   },
 });
 
-new HirokitSiteStack(app, 'HirokitSiteStack', {
-  env
+// 証明書スタック（us-east-1）
+const certificateStack = new CertificateStack(app, 'HirokitCertificateStack', {
+  env: { ...env, region: 'us-east-1' },
+  crossRegionReferences: true,
 });
+
+// メインのスタック
+const hirokitSiteStack = new HirokitSiteStack(app, 'HirokitSiteStack', {
+  env,
+  crossRegionReferences: true,
+  certificate: certificateStack.certificate,
+});
+hirokitSiteStack.addDependency(certificateStack);

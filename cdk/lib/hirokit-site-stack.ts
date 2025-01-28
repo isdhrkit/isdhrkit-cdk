@@ -8,22 +8,20 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 import { getCurrentConfig } from './config';
 
+export interface HirokitSiteStackProps extends cdk.StackProps {
+  certificate: acm.Certificate;
+}
+
 export class HirokitSiteStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: HirokitSiteStackProps) {
     super(scope, id, props);
 
     const config = getCurrentConfig();
-    const fullDomainName = `${config.domain.wwwSubDomain}.${config.domain.domainName}`;
+    const fullDomainName = `${config.domain.subDomain}.${config.domain.domainName}`;
 
     // Route 53のホストゾーンを取得
     const zone = route53.HostedZone.fromLookup(this, 'Zone', {
       domainName: config.domain.domainName,
-    });
-
-    // ACM証明書の作成
-    const certificate = new acm.Certificate(this, 'SiteCertificate', {
-      domainName: fullDomainName,
-      validation: acm.CertificateValidation.fromDns(zone),
     });
 
     // S3バケットの作成
@@ -49,13 +47,13 @@ export class HirokitSiteStack extends cdk.Stack {
       },
       // 代替ドメイン名の設定
       domainNames: [fullDomainName],
-      certificate: certificate, // SSL証明書を設定
+      certificate: props.certificate,
     });
 
     // Route 53にAレコードを作成
     new route53.ARecord(this, 'SiteAliasRecord', {
       zone,
-      recordName: config.domain.wwwSubDomain,
+      recordName: config.domain.subDomain,
       target: route53.RecordTarget.fromAlias(
         new targets.CloudFrontTarget(distribution)
       ),
