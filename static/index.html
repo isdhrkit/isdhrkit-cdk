@@ -99,6 +99,11 @@
     const ctx = canvas.getContext('2d', { alpha: false });
     const socialBoard = document.querySelector('.social-board');
 
+    // フレームレート制御の設定
+    const FPS = 60;
+    const FRAME_INTERVAL = 1000 / FPS;
+    let lastFrameTime = 0;
+
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -151,7 +156,17 @@
     }
 
     let animationId;
-    function draw() {
+    function draw(currentTime) {
+        // フレームレート制御
+        if (lastFrameTime === 0) lastFrameTime = currentTime;
+        const elapsed = currentTime - lastFrameTime;
+        
+        if (elapsed < FRAME_INTERVAL) {
+            animationId = requestAnimationFrame(draw);
+            return;
+        }
+        lastFrameTime = currentTime;
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -179,8 +194,9 @@
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             cancelAnimationFrame(animationId);
+            lastFrameTime = 0;
         } else {
-            draw();
+            requestAnimationFrame(draw);
         }
     });
 
@@ -195,7 +211,7 @@
         }, 250);
     });
 
-    draw();
+    requestAnimationFrame(draw);
   </script>
 </body>
 </html>
