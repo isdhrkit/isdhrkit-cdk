@@ -1,5 +1,5 @@
 name: CDK Deployment
-run-name: "CDK ${{ inputs.action }}"
+run-name: "CDK ${{ inputs.action }} on ${{ inputs.environment }}"
 
 on:
   workflow_dispatch:
@@ -11,6 +11,15 @@ on:
         options:
           - diff
           - deploy
+      environment:
+        description: 'デプロイ環境'
+        required: true
+        type: choice
+        default: 'dev'
+        options:
+          - dev
+          - stg
+          - prod
 
 permissions:
   id-token: write
@@ -18,7 +27,7 @@ permissions:
 
 jobs:
   cdk:
-    name: CDK ${{ inputs.action }}
+    name: CDK ${{ inputs.action }} on ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -44,8 +53,10 @@ jobs:
       - name: CDK Diff
         if: inputs.action == 'diff'
         working-directory: ./cdk
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          echo "# CDK Diff Results" > diff_output.md
+          echo "# CDK Diff Results for ${{ inputs.environment }}" > diff_output.md
           echo "\`\`\`diff" >> diff_output.md
           npx cdk diff --color=never >> diff_output.md 2>&1 || true
           echo "\`\`\`" >> diff_output.md
@@ -54,8 +65,10 @@ jobs:
       - name: CDK Deploy
         if: inputs.action == 'deploy'
         working-directory: ./cdk
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          echo "# CDK Deploy Results" > deploy_output.md
+          echo "# CDK Deploy Results for ${{ inputs.environment }}" > deploy_output.md
           echo "\`\`\`" >> deploy_output.md
           npx cdk deploy --all --require-approval never 2>&1 | tee -a deploy_output.md
           echo "\`\`\`" >> deploy_output.md

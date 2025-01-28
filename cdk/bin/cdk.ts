@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
 import { GitHubOidcStack } from '../lib/github-oidc-stack';
-import { S3Stack } from '../lib/s3-stack';
 import { HirokitSiteStack } from '../lib/hirokit-site-stack';
 
 const app = new cdk.App();
@@ -21,8 +20,6 @@ const githubOidcStack = new GitHubOidcStack(app, 'GitHubOidcStack', {
     repo: 'isdhrkit-cdk',
   },
 });
-
-
 
 new HirokitSiteStack(app, 'HirokitSiteStack', {
   env
