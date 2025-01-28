@@ -12,17 +12,93 @@
     canvas {
       display: block;
     }
+    .social-board {
+      position: fixed;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #0F0;
+      border-radius: 10px;
+      padding: 20px;
+      color: #0F0;
+      font-family: monospace;
+      z-index: 2;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+    .social-board h2 {
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      text-align: center;
+      text-shadow: 0 0 5px #0F0;
+    }
+    .social-link {
+      display: flex;
+      align-items: center;
+      color: #0F0;
+      text-decoration: none;
+      margin: 10px 0;
+      padding: 8px;
+      border: 1px solid #0F0;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    .social-link:hover {
+      background: #0F0;
+      color: black;
+      box-shadow: 0 0 10px #0F0;
+    }
+    .social-link img {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(106deg) brightness(104%) contrast(104%);
+    }
+    .social-link:hover img {
+      filter: none;
+    }
   </style>
 </head>
 <body>
   <canvas id="matrix"></canvas>
+  
+  <div class="social-board">
+    <h2>CONNECT WITH ME</h2>
+    <a href="https://github.com/isdhrkit" target="_blank" class="social-link">
+      <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/github.svg" alt="GitHub">
+      GitHub
+    </a>
+    <a href="https://twitter.com/hirokit_0111" target="_blank" class="social-link">
+      <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/twitter.svg" alt="Twitter">
+      Twitter
+    </a>
+  </div>
+
   <script>
     const canvas = document.getElementById('matrix');
     const ctx = canvas.getContext('2d');
+    const socialBoard = document.querySelector('.social-board');
 
     // キャンバスをウィンドウサイズに合わせる
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    // ソーシャルボードの位置とサイズを取得
+    const boardRect = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+    };
+
+    function updateBoardRect() {
+        const rect = socialBoard.getBoundingClientRect();
+        boardRect.x = rect.left;
+        boardRect.y = rect.top;
+        boardRect.width = rect.width;
+        boardRect.height = rect.height;
+    }
+    updateBoardRect();
 
     // 日本語と数字の文字列を作成
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
@@ -32,40 +108,34 @@
 
     // ロゴを描画する関数
     function drawLogo() {
-      ctx.save();
-      ctx.fillStyle = 'rgba(0, 50, 0, 0.5)';  // 暗めの緑色
-      ctx.font = 'bold 150px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('HIROKIT', canvas.width / 2, canvas.height / 2);
-      ctx.restore();
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 50, 0, 0.5)';
+        ctx.font = 'bold 150px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('HIROKIT', canvas.width / 2, canvas.height / 2);
+        ctx.restore();
     }
 
     function draw() {
-      // 半透明の黒で前のフレームを徐々に消す
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // ロゴを描画
-      drawLogo();
+        drawLogo();
 
-      // 文字の設定
-      ctx.fillStyle = '#0F0';
-      ctx.font = fontSize + 'px monospace';
+        ctx.fillStyle = '#0F0';
+        ctx.font = fontSize + 'px monospace';
 
-      // 各列の文字を描画
-      drops.forEach((y, i) => {
-        // ランダムな文字を選択
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        ctx.fillText(text, x, y * fontSize);
+        drops.forEach((y, i) => {
+            const text = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            ctx.fillText(text, x, y * fontSize);
 
-        // 文字が画面下まで到達したらリセット
-        if (y * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      });
+            if (y * fontSize > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        });
     }
 
     // アニメーションの実行
@@ -73,10 +143,11 @@
 
     // ウィンドウリサイズ時の処理
     window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drops.length = Math.floor(canvas.width / fontSize);
-      drops.fill(1);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drops.length = Math.floor(canvas.width / fontSize);
+        drops.fill(1);
+        updateBoardRect();
     });
   </script>
 </body>
