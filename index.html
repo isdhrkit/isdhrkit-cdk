@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>マトリックス風コード</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    // キャンバスをウィンドウサイズに合わせる
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // 日本語と数字の文字列を作成
+    const chars = "HIROKITようこそ".split("");
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = new Array(Math.floor(columns)).fill(1);
+
+    // ロゴを描画する関数
+    function drawLogo() {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 50, 0, 0.5)';  // 暗めの緑色
+      ctx.font = 'bold 150px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('HIROKIT', canvas.width / 2, canvas.height / 2);
+      ctx.restore();
+    }
+
+    function draw() {
+      // 半透明の黒で前のフレームを徐々に消す
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // ロゴを描画
+      drawLogo();
+
+      // 文字の設定
+      ctx.fillStyle = '#0F0';
+      ctx.font = fontSize + 'px monospace';
+
+      // 各列の文字を描画
+      drops.forEach((y, i) => {
+        // ランダムな文字を選択
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        ctx.fillText(text, x, y * fontSize);
+
+        // 文字が画面下まで到達したらリセット
+        if (y * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      });
+    }
+
+    // アニメーションの実行
+    setInterval(draw, 33);
+
+    // ウィンドウリサイズ時の処理
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drops.length = Math.floor(canvas.width / fontSize);
+      drops.fill(1);
+    });
+  </script>
+</body>
+</html>

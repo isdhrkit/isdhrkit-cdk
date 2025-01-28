@@ -1,4 +1,5 @@
 export interface SiteConfig {
+  environment: string;
   domain: {
     domainName: string;
     subDomain: string;
@@ -11,6 +12,7 @@ export interface SiteConfig {
 
 export const config: { [env: string]: SiteConfig } = {
   dev: {
+    environment: 'Dev',
     domain: {
       domainName: 'hirokit.jp',
       subDomain: 'dev',
@@ -21,6 +23,7 @@ export const config: { [env: string]: SiteConfig } = {
     },
   },
   stg: {
+    environment: 'Stg',
     domain: {
       domainName: 'hirokit.jp',
       subDomain: 'stg',
@@ -31,6 +34,7 @@ export const config: { [env: string]: SiteConfig } = {
     },
   },
   prod: {
+    environment: 'Prod',
     domain: {
       domainName: 'hirokit.jp',
       subDomain: 'www',

@@ -4,7 +4,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 import { getCurrentConfig } from './config';
 
-export class CertificateStack extends cdk.Stack {
+export class GlobalCertificateStack extends cdk.Stack {
   public readonly certificate: acm.Certificate;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -13,11 +13,11 @@ export class CertificateStack extends cdk.Stack {
     const config = getCurrentConfig();
     const fullDomainName = `${config.domain.subDomain}.${config.domain.domainName}`;
 
-    const zone = route53.HostedZone.fromLookup(this, 'Zone', {
+    const zone = route53.HostedZone.fromLookup(this, `${config.environment}Zone`, {
       domainName: config.domain.domainName,
     });
 
-    this.certificate = new acm.Certificate(this, 'SiteCertificate', {
+    this.certificate = new acm.Certificate(this, `${config.environment}SiteCertificate`, {
       domainName: fullDomainName,
       validation: acm.CertificateValidation.fromDns(zone),
     });

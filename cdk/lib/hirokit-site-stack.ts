@@ -25,7 +25,7 @@ export class HirokitSiteStack extends cdk.Stack {
     });
 
     // S3バケットの作成
-    const siteBucket = new s3.Bucket(this, 'HirokitSiteBucket', {
+    const siteBucket = new s3.Bucket(this, `${config.environment}SiteBucket`, {
       bucketName: config.s3.bucketName,
       // バケットの公開アクセスをブロック
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -34,7 +34,7 @@ export class HirokitSiteStack extends cdk.Stack {
     });
 
     // CloudFrontディストリビューションの作成
-    const distribution = new cloudfront.Distribution(this, 'HirokitSiteDistribution', {
+    const distribution = new cloudfront.Distribution(this, `${config.environment}SiteDistribution`, {
       // デフォルトのビヘイビア設定
       defaultBehavior: {
         // S3バケットをオリジンとして設定し、OACを有効化
@@ -48,10 +48,11 @@ export class HirokitSiteStack extends cdk.Stack {
       // 代替ドメイン名の設定
       domainNames: [fullDomainName],
       certificate: props.certificate,
+      defaultRootObject: 'index.html',
     });
 
     // Route 53にAレコードを作成
-    new route53.ARecord(this, 'SiteAliasRecord', {
+    new route53.ARecord(this, `${config.environment}SiteAliasRecord`, {
       zone,
       recordName: config.domain.subDomain,
       target: route53.RecordTarget.fromAlias(
@@ -60,7 +61,7 @@ export class HirokitSiteStack extends cdk.Stack {
     });
 
     // スタックの出力としてCloudFrontのドメイン名を表示
-    new cdk.CfnOutput(this, 'DistributionDomainName', {
+    new cdk.CfnOutput(this, `${config.environment}DistributionDomainName`, {
       value: distribution.distributionDomainName,
       description: 'CloudFront distribution domain name',
     });
