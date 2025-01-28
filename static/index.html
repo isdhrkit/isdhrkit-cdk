@@ -76,14 +76,21 @@
 
   <script>
     const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     const socialBoard = document.querySelector('.social-board');
 
-    // キャンバスをウィンドウサイズに合わせる
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.style.width = `${canvas.width}px`;
+        canvas.style.height = `${canvas.height}px`;
+        canvas.width *= dpr;
+        canvas.height *= dpr;
+        ctx.scale(dpr, dpr);
+    }
+    resizeCanvas();
 
-    // ソーシャルボードの位置とサイズを取得
     const boardRect = {
         x: 0,
         y: 0,
@@ -100,55 +107,67 @@
     }
     updateBoardRect();
 
-    // 日本語と数字の文字列を作成
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = new Array(Math.floor(columns)).fill(1);
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = new Array(columns).fill(1);
 
-    // ロゴを描画する関数
-    function drawLogo() {
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 50, 0, 0.5)';
-        ctx.font = 'bold 150px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('HIROKIT', canvas.width / 2, canvas.height / 2);
-        ctx.restore();
-    }
+    const logoCanvas = document.createElement('canvas');
+    const logoCtx = logoCanvas.getContext('2d');
+    logoCanvas.width = canvas.width;
+    logoCanvas.height = canvas.height;
+    logoCtx.fillStyle = 'rgba(0, 50, 0, 0.5)';
+    logoCtx.font = 'bold 150px Arial';
+    logoCtx.textAlign = 'center';
+    logoCtx.textBaseline = 'middle';
+    logoCtx.fillText('HIROKIT', canvas.width / 2, canvas.height / 2);
 
+    let animationId;
     function draw() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        drawLogo();
+        ctx.drawImage(logoCanvas, 0, 0);
 
         ctx.fillStyle = '#0F0';
         ctx.font = fontSize + 'px monospace';
 
-        drops.forEach((y, i) => {
+        for (let i = 0; i < drops.length; i++) {
+            if (i % 3 !== 0) continue;
+
             const text = chars[Math.floor(Math.random() * chars.length)];
             const x = i * fontSize;
-            ctx.fillText(text, x, y * fontSize);
+            ctx.fillText(text, x, drops[i] * fontSize);
 
-            if (y * fontSize > canvas.height && Math.random() > 0.975) {
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                 drops[i] = 0;
             }
             drops[i]++;
-        });
+        }
+
+        animationId = requestAnimationFrame(draw);
     }
 
-    // アニメーションの実行
-    setInterval(draw, 33);
-
-    // ウィンドウリサイズ時の処理
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        drops.length = Math.floor(canvas.width / fontSize);
-        drops.fill(1);
-        updateBoardRect();
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            cancelAnimationFrame(animationId);
+        } else {
+            draw();
+        }
     });
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            resizeCanvas();
+            drops.length = Math.floor(canvas.width / fontSize);
+            drops.fill(1);
+            updateBoardRect();
+        }, 250);
+    });
+
+    draw();
   </script>
 </body>
 </html>
