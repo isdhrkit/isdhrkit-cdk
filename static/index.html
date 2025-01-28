@@ -106,11 +106,15 @@
     /* レスポンシブデザイン */
     @media (max-width: 768px) {
       .social-board {
-        position: relative;
+        position: fixed;
         right: auto;
         top: auto;
-        margin: 20px auto;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
         max-width: 80%;
+        width: calc(100% - 40px);
       }
 
       .side-menu {
@@ -124,6 +128,7 @@
       body {
         padding: 20px;
         overflow-y: auto;
+        padding-bottom: calc(100vh - 40px);  /* プロフィールボード分の余白を確保 */
       }
 
       canvas {
@@ -137,6 +142,22 @@
         width: 100%;
         box-sizing: border-box;
       }
+    }
+
+    @media screen and (max-width: 768px) {
+        .container {
+            flex-direction: column-reverse;  /* プロフィールボードを下部に配置 */
+            padding: 1rem;
+        }
+
+        .profile-board {
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .content-board {
+            width: 100%;
+        }
     }
   </style>
 </head>
@@ -207,14 +228,17 @@
     function drawCenterLogo() {
         ctx.save();
         ctx.fillStyle = 'rgba(0, 40, 0, 0.6)';
-        ctx.font = 'bold 120px "Arial Black", Arial, sans-serif';
+        
+        // スマホ表示時はフォントサイズを調整
+        const fontSize = window.innerWidth <= 768 ? '60px' : '120px';
+        ctx.font = `bold ${fontSize} "Arial Black", Arial, sans-serif`;
+        
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
         ctx.shadowColor = 'rgba(0, 255, 0, 0.2)';
         ctx.shadowBlur = 15;
         
-        // キャンバスの実際の中心座標を使用
         const centerX = canvas.width / (2 * window.devicePixelRatio);
         const centerY = canvas.height / (2 * window.devicePixelRatio);
         
