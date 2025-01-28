@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お酒ルーレット - hirokit.dev</title>
+    <style>
+        body {
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: black;
+            color: #0F0;
+            overflow: hidden;
+        }
+
+        .roulette-container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #0F0;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            z-index: 2;
+        }
+
+        h1 {
+            text-shadow: 0 0 5px #0F0;
+            margin-bottom: 30px;
+        }
+
+        .result {
+            font-size: 2em;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+            border: 2px solid #0F0;
+            text-shadow: 0 0 5px #0F0;
+            transition: all 0.3s ease;
+        }
+
+        .yes {
+            background-color: rgba(0, 255, 0, 0.2);
+            border-color: #0F0;
+            box-shadow: 0 0 20px #0F0;
+        }
+
+        .no {
+            background-color: rgba(255, 0, 0, 0.2);
+            border-color: #F00;
+            color: #F00;
+            text-shadow: 0 0 5px #F00;
+            box-shadow: 0 0 20px #F00;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #0F0;
+            border: 2px solid #0F0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #0F0;
+            color: black;
+            box-shadow: 0 0 20px #0F0;
+        }
+
+        .home-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #0F0;
+            text-decoration: none;
+            border: 2px solid #0F0;
+            border-radius: 5px;
+            font-family: monospace;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            z-index: 2;
+        }
+
+        .home-link:hover {
+            background-color: #0F0;
+            color: black;
+            box-shadow: 0 0 20px #0F0;
+        }
+
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .roulette-container {
+                margin: 60px 20px 20px;
+                width: calc(100% - 40px);
+                box-sizing: border-box;
+            }
+
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+
+            .result {
+                font-size: 1.5em;
+                padding: 15px;
+                min-width: 150px;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            .home-link {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            body {
+                padding: 0 10px;
+            }
+        }
+
+        /* 小さい画面用の追加調整 */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.2em;
+            }
+
+            .result {
+                font-size: 1.3em;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <a href="/" class="home-link">ホームに戻る</a>
+    <div class="roulette-container">
+        <h1>今日はお酒を飲んでもいい？</h1>
+        <div id="result" class="result"></div>
+        <button onclick="spin()">回す</button>
+    </div>
+
+    <script>
+        // マトリックスエフェクト
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = new Array(columns).fill(1);
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                if (i % 3 !== 0) continue;
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSize;
+                ctx.fillText(text, x, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        // ルーレット機能
+        function spin() {
+            const result = document.getElementById('result');
+            result.textContent = '...';
+            result.className = 'result';
+            
+            let dots = 0;
+            const loadingInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                result.textContent = '.'.repeat(dots);
+            }, 200);
+            
+            setTimeout(() => {
+                clearInterval(loadingInterval);
+                const random = Math.random();
+                if (random < 0.5) {
+                    result.textContent = 'YES!';
+                    result.classList.add('yes');
+                } else {
+                    result.textContent = 'NO...';
+                    result.classList.add('no');
+                }
+            }, 2000);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drops.length = Math.floor(canvas.width / fontSize);
+            drops.fill(1);
+        });
+
+        setInterval(draw, 33);
+    </script>
+</body>
+</html> 

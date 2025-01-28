@@ -54,6 +54,12 @@ export class HirokitSiteStack extends cdk.Stack {
           }),
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
+        '/roulette/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
+            originPath: config.s3.contentPath,
+          }),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
       },
       // 代替ドメイン名の設定
       domainNames: [fullDomainName],

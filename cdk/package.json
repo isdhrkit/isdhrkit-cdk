@@ -8,8 +8,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk-diff": "ENVIRONMENT=dev cdk diff",
-    "cdk-deploy": "ENVIRONMENT=dev cdk deploy --require-approval never --all"
+    "cdk-diff-dev": "ENVIRONMENT=dev cdk diff",
+    "cdk-deploy-dev": "ENVIRONMENT=dev cdk deploy --require-approval never --all",
+    "cdk-diff-prd": "ENVIRONMENT=prod cdk diff",
+    "cdk-deploy-prd": "ENVIRONMENT=prod cdk deploy --require-approval never --all"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

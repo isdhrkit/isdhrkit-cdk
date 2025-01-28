@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HIROKIT</title>
   <style>
     body {
@@ -74,9 +75,75 @@
     .social-link:hover img {
       filter: none;
     }
+    .side-menu {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2;
+    }
+    .menu-button {
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #0F0;
+      border: 2px solid #0F0;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      font-family: monospace;
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    }
+    .menu-button:hover {
+      background-color: #0F0;
+      color: black;
+      box-shadow: 0 0 20px #0F0;
+    }
+    
+    /* レスポンシブデザイン */
+    @media (max-width: 768px) {
+      .social-board {
+        position: relative;
+        right: auto;
+        top: auto;
+        margin: 20px auto;
+        max-width: 80%;
+      }
+
+      .side-menu {
+        position: relative;
+        left: auto;
+        top: auto;
+        margin: 20px auto;
+        width: 80%;
+      }
+
+      body {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+
+      .menu-button {
+        width: 100%;
+        box-sizing: border-box;
+      }
+    }
   </style>
 </head>
 <body>
+  <nav class="side-menu">
+    <a href="/roulette/drink" class="menu-button">お酒ルーレット</a>
+  </nav>
   <canvas id="matrix"></canvas>
   
   <div class="social-board">
