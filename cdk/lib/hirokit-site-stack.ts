@@ -6,6 +6,7 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { getCurrentConfig } from './config';
 
@@ -56,6 +57,21 @@ export class HirokitSiteStack extends cdk.Stack {
       comment: 'Add index.html to the path',
     });
 
+    // SSM から公開鍵を取得
+    const publicKey = ssm.StringParameter.fromStringParameterAttributes(this, `${config.environment}HirokitSecretPagePublicKey`, {
+      parameterName: `/cloudfront/hirokit/secret/public_key`,
+    }).stringValue;
+
+    
+    // キーグループの作成
+    const keyGroup = new cloudfront.KeyGroup(this, `${config.environment}CloudFrontHirokitSecretPageKeyGroup`, {
+      items: [
+        new cloudfront.PublicKey(this, `${config.environment}CloudFrontHirokitSecretPagePublicKey`, {
+          encodedKey: publicKey,
+        }),
+      ],
+    });
+
     // CloudFrontディストリビューションの作成
     const distribution = new cloudfront.Distribution(this, `${config.environment}SiteDistribution`, {
       defaultBehavior: {
@@ -70,6 +86,17 @@ export class HirokitSiteStack extends cdk.Stack {
       },
       // 追加のビヘイビアを設定
       additionalBehaviors: {
+        '/secret/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
+            originPath: `${config.s3.contentPath}/secret`,
+          }),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          trustedKeyGroups: [keyGroup],
+          functionAssociations: [{
+            function: appendIndexFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          }],
+        },
         '/404.html': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
             originPath: `${config.s3.contentPath}/errors`,
