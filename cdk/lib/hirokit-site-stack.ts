@@ -57,7 +57,6 @@ export class HirokitSiteStack extends cdk.Stack {
       comment: 'Add index.html to the path',
     });
 
-    // SSM から公開鍵を取得
     const publicKey = ssm.StringParameter.fromStringParameterAttributes(this, `${config.environment}HirokitSecretPagePublicKey`, {
       parameterName: `/cloudfront/hirokit/secret/public_key`,
     }).stringValue;
@@ -86,9 +85,20 @@ export class HirokitSiteStack extends cdk.Stack {
       },
       // 追加のビヘイビアを設定
       additionalBehaviors: {
+        '/secret': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
+            originPath: `${config.s3.contentPath}`,
+          }),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          trustedKeyGroups: [keyGroup],
+          functionAssociations: [{
+            function: appendIndexFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          }],
+        },
         '/secret/*': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
-            originPath: `${config.s3.contentPath}/secret`,
+            originPath: `${config.s3.contentPath}`,
           }),
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           trustedKeyGroups: [keyGroup],
