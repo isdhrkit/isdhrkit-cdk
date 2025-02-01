@@ -113,6 +113,13 @@ export class HirokitSiteStack extends cdk.Stack {
       certificate: props.certificate,
       defaultRootObject: 'index.html',
       // 404エラーページの設定を追加
+      errorResponses: [
+        {
+          httpStatus: 404,
+          responseHttpStatus: 404,
+          responsePagePath: '/404.html',
+        }
+      ],
     });
 
     // CloudFrontのOACからのアクセスを許可するバケットポリシーを追加
