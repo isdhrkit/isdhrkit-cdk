@@ -107,25 +107,12 @@ export class HirokitSiteStack extends cdk.Stack {
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           }],
         },
-        '/404.html': {
-          origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
-            originPath: `${config.s3.contentPath}/errors`,
-          }),
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        },
       },
       // 代替ドメイン名の設定
       domainNames: [fullDomainName],
       certificate: props.certificate,
       defaultRootObject: 'index.html',
       // 404エラーページの設定を追加
-      errorResponses: [
-        {
-          httpStatus: 404,
-          responseHttpStatus: 404,
-          responsePagePath: '/404.html',
-        }
-      ],
     });
 
     // CloudFrontのOACからのアクセスを許可するバケットポリシーを追加
