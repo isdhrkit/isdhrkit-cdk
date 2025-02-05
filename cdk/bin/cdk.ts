@@ -4,6 +4,7 @@ import { GitHubOidcStack } from '../lib/github-oidc-stack';
 import { HirokitSiteStack } from '../lib/hirokit-site-stack';
 import { GlobalCertificateStack } from '../lib/global-certificate-stack';
 import { getCurrentConfig } from '../lib/config';
+import { FeatureRequestStack } from '../lib/feature-request-stack';
 
 const app = new cdk.App();
 
@@ -36,3 +37,8 @@ const hirokitSiteStack = new HirokitSiteStack(app, `${getCurrentConfig().environ
   certificate: globalCertificateStack.certificate,
 });
 hirokitSiteStack.addDependency(globalCertificateStack);
+
+// 機能要望フォーム用のスタック
+new FeatureRequestStack(app, `${getCurrentConfig().environment}FeatureRequestStack`, {
+  env,
+});
